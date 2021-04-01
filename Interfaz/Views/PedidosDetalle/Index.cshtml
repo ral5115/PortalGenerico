@@ -1,0 +1,1171 @@
+﻿@using System.Data
+@using Newtonsoft.Json;
+
+@model DataSet
+
+@{
+    DataSet DatosImportantes = JsonConvert.DeserializeObject<DataSet>(Session["DatosImportantes"].ToString());
+    string Fondo = DatosImportantes.Tables[0].Rows[0]["EP_ColorFondoCentral"].ToString();
+
+    if (DatosImportantes.Tables[0].Rows[0]["EP_UrlFondo"].ToString() != string.Empty)
+    {
+        Fondo = "background-image:url('" + DatosImportantes.Tables[0].Rows[0]["EP_UrlFondo"].ToString() + "'); background-size: cover";
+    }
+
+    var Encabezado = from pedidos in Model.Tables[0].AsEnumerable()
+                     select new
+                     {
+                         OrderId = pedidos[1],
+                         FechaPedido = pedidos[3],
+                         Total = pedidos[10],
+                         Estado = pedidos[19],
+                         Documento = pedidos[4],
+                         Cliente = pedidos[5],
+                         Celular = pedidos[6],
+                         Email = pedidos[7],
+                         PostalCode = pedidos[8],
+                         Direccion = pedidos[9],
+                         Factura = pedidos[11],
+                         CodigoAlterno = pedidos[21]
+                     };
+
+    var EncabezadoAgrupado = Encabezado
+                            .GroupBy(e => new
+                            {
+                                e.OrderId,
+                                e.FechaPedido,
+                                e.Total,
+                                e.Estado,
+                                e.Documento,
+                                e.Cliente,
+                                e.Celular,
+                                e.Email,
+                                e.PostalCode,
+                                e.Direccion,
+                                e.Factura,
+                                e.CodigoAlterno
+                            }).FirstOrDefault();
+    var RowId = string.Empty;
+
+    if (Model.Tables.Count > 0)
+    {
+        if (Model.Tables[0].Rows.Count > 0)
+        {
+            RowId = Model.Tables[0].Rows[0]["RowId"].ToString();
+        }
+    }
+
+}
+
+@if (Model.Tables[0].Rows.Count > 0)
+{
+    <div class="main-panel">
+        <div class="content">
+            <div class="card">
+                <div class="card-body" style="@Fondo">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header">
+
+                                    @*Titulo Encabezado*@
+                                    <div class="row">
+
+                                        <div class="col-md-3">
+                                            <h4 class="card-title" style="color:red; font-weight:500">Encabezado</h4>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <input type="text" value="@EncabezadoAgrupado.Key.OrderId" id="OrderId" name="OrderId" class="form-control" placeholder="Ingresar OrderId" />
+                                        </div>
+
+                                        <div class="col-md-2" style="left:35px;">
+                                            <input value="Consultar" class="btn" style="@DatosImportantes.Tables[0].Rows[0]["EP_ColorBotonConsultar"].ToString(); @DatosImportantes.Tables[0].Rows[0]["EP_ColorTextoBotones"].ToString()" type="button" onclick="location.href='@Url.Action("Buscar", "PedidosDetalle")?OrderId=' + document.getElementById('OrderId').value" />
+                                        </div>
+
+                                        <div class="col-md-1">
+                                            <input value="<" class="btn" type="button" style="@DatosImportantes.Tables[0].Rows[0]["EP_ColorBotonActualizar"].ToString(); @DatosImportantes.Tables[0].Rows[0]["EP_ColorTextoBotones"].ToString()" color:white" onclick="location.href='@Url.Action("Regresar", "PedidosDetalle")?RowId=' + @RowId" />
+                                        </div>
+
+                                        <div class="col-md-1">
+                                            <input value=">" class="btn" type="button" style="@DatosImportantes.Tables[0].Rows[0]["EP_ColorBotonActualizar"].ToString(); @DatosImportantes.Tables[0].Rows[0]["EP_ColorTextoBotones"].ToString()" color:white" onclick="location.href='@Url.Action("Siguiente", "PedidosDetalle")?RowId=' + @RowId" />
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <input value="Regresar" class="btn" style="@DatosImportantes.Tables[0].Rows[0]["EP_ColorBotonConsultar"].ToString(); @DatosImportantes.Tables[0].Rows[0]["EP_ColorTextoBotones"].ToString()" type="button" onclick="location.href='@Url.Action("Index", "Pedidos")'" />
+                                        </div>
+
+                                    </div>
+
+                                    <br />
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <h4 class="card-title" style="color:red; font-weight:500">@ViewData["Error"]</h4>
+                                        </div>
+                                    </div>
+                                    <br />
+
+                                    @*Datos Encabezado*@
+                                    <div class="row">
+                                        <div class="col-md-3"><label><strong>OrderId: </strong>@EncabezadoAgrupado.Key.OrderId</label></div>
+                                        <div class="col-md-3"><label><strong>Fecha: </strong>@EncabezadoAgrupado.Key.FechaPedido</label></div>
+                                        <div class="col-md-3"><label><strong>Total Pagar: </strong>@EncabezadoAgrupado.Key.Total</label></div>
+                                        <div class="col-md-3"><label><strong>Estado: </strong>@EncabezadoAgrupado.Key.Estado</label></div>
+                                    </div>
+
+                                    <br />
+
+                                    <div class="row">
+                                        <div class="col-md-3"><label><strong>Documento: </strong>@EncabezadoAgrupado.Key.Documento</label></div>
+                                        <div class="col-md-3"><label><strong>Cliente: </strong>@EncabezadoAgrupado.Key.Cliente</label></div>
+                                        <div class="col-md-3"><label><strong>Celular: </strong>@EncabezadoAgrupado.Key.Celular</label></div>
+                                        <div class="col-md-3"><label><strong>Correo: </strong>@EncabezadoAgrupado.Key.Email</label></div>
+                                    </div>
+
+                                    <br />
+
+                                    <div class="row">
+                                        <div class="col-md-3"><label><strong>Codigo Postal: </strong>@EncabezadoAgrupado.Key.PostalCode</label></div>
+                                        <div class="col-md-3"><label><strong>Factura: </strong>@EncabezadoAgrupado.Key.Factura</label></div>
+                                        <div class="col-md-6"><label><strong>Dirección: </strong>@EncabezadoAgrupado.Key.Direccion</label></div>
+                                    </div>
+
+                                    <br />  
+
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            @if (Model.Tables[0].Rows[0]["EAN"].ToString() != "")
+                                            {
+                                                var Facturas = true;
+
+                                                foreach (DataRow row in Model.Tables[0].Rows)
+                                                {
+                                                    var Entrada = row["Entrada"].ToString();
+
+                                                    if (Entrada == "")
+                                                    {
+                                                        Facturas = false;
+                                                        break;
+                                                    }
+                                                }
+
+
+                                                if (Facturas)
+                                                {
+                                                    if (EncabezadoAgrupado.Key.Estado.Equals("Facturado")
+                                                        || EncabezadoAgrupado.Key.Estado.Equals("Guia Coordinadora")
+                                                        || EncabezadoAgrupado.Key.Estado.Equals("Handling")
+                                                        || EncabezadoAgrupado.Key.Estado.Equals("Invoiced")
+                                                        || EncabezadoAgrupado.Key.Estado.Equals("Tracking")
+                                                        || EncabezadoAgrupado.Key.Estado.Equals("Anulado")
+                                                        || EncabezadoAgrupado.Key.Estado.Equals("No Produccion"))
+                                                    {
+                                                        <select id="RowIdEmpaques" name="RowIdEmpaques" class="form-control" required disabled>
+                                                            @foreach (var listItem in (List<SelectListItem>)ViewBag.ListadoEmpaques)
+                                                            {
+                                                                <option value="@listItem.Value" @(listItem.Selected ? "selected" : "")>
+                                                                    @listItem.Text
+                                                                </option>
+                                                            }
+                                                        </select>
+                                                    }
+                                                    else
+                                                    {
+                                                        <select id="RowIdEmpaques" name="RowIdEmpaques" class="form-control" required>
+                                                            @foreach (var listItem in (List<SelectListItem>)ViewBag.ListadoEmpaques)
+                                                            {
+                                                                <option value="@listItem.Value" @(listItem.Selected ? "selected" : "")>
+                                                                    @listItem.Text
+                                                                </option>
+                                                            }
+                                                        </select>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <select id="RowIdEmpaques" name="RowIdEmpaques" class="form-control" required disabled>
+                                                        @foreach (var listItem in (List<SelectListItem>)ViewBag.ListadoEmpaques)
+                                                        {
+                                                            <option value="@listItem.Value" @(listItem.Selected ? "selected" : "")>
+                                                                @listItem.Text
+                                                            </option>
+                                                        }
+                                                    </select>
+                                                }
+                                            }
+                                        </div>
+                                        <div class="col-md-3">
+                                            @if (Model.Tables[0].Rows[0]["EAN"].ToString() != "")
+                                            {
+                                                var Facturas = true;
+
+                                                foreach (DataRow row in Model.Tables[0].Rows)
+                                                {
+                                                    var Entrada = row["Entrada"].ToString();
+
+                                                    if (Entrada == "")
+                                                    {
+                                                        Facturas = false;
+                                                        break;
+                                                    }
+                                                }
+
+
+                                                if (Facturas)
+                                                {
+                                                    if (EncabezadoAgrupado.Key.Estado.Equals("Guia Coordinadora")
+                                                        || EncabezadoAgrupado.Key.Estado.Equals("Handling")
+                                                        || EncabezadoAgrupado.Key.Estado.Equals("Invoiced")
+                                                        || EncabezadoAgrupado.Key.Estado.Equals("Tracking")
+                                                        || EncabezadoAgrupado.Key.Estado.Equals("Anulado")
+                                                        || EncabezadoAgrupado.Key.Estado.Equals("No Produccion"))
+                                                    {
+                                                        <input type="text" class="form-control" name="CodigoAlterno" id="CodigoAlterno" value="@EncabezadoAgrupado.Key.CodigoAlterno" placeholder="Codigo Alterno Coordinadora" disabled />
+                                                    }
+                                                    else
+                                                    {
+                                                        <input type="text" class="form-control" name="CodigoAlterno" id="CodigoAlterno" value="@EncabezadoAgrupado.Key.CodigoAlterno" placeholder="Codigo Alterno Coordinadora" />
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <input type="text" class="form-control" name="CodigoAlterno" id="CodigoAlterno" value="@EncabezadoAgrupado.Key.CodigoAlterno" placeholder="Codigo Alterno Coordinadora" disabled />
+                                                }
+                                            }
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            @if (Model.Tables[0].Rows[0]["EAN"].ToString() != "")
+                                            {
+                                                var Facturas = true;
+
+                                                foreach (DataRow row in Model.Tables[0].Rows)
+                                                {
+                                                    var Entrada = row["Entrada"].ToString();
+
+                                                    if (Entrada == "")
+                                                    {
+                                                        Facturas = false;
+                                                        break;
+                                                    }
+                                                }
+
+
+                                                if (Facturas)
+                                                {
+                                                    if (EncabezadoAgrupado.Key.Estado.Equals("Guia Coordinadora")
+                                                        || EncabezadoAgrupado.Key.Estado.Equals("Handling")
+                                                        || EncabezadoAgrupado.Key.Estado.Equals("Invoiced")
+                                                        || EncabezadoAgrupado.Key.Estado.Equals("Tracking")
+                                                        || EncabezadoAgrupado.Key.Estado.Equals("Anulado")
+                                                        || EncabezadoAgrupado.Key.Estado.Equals("No Produccion"))
+                                                    {
+                                                        <input type="text" class="form-control" name="FacturaAlterna" id="FacturaAlterna" placeholder="Numero Factura Pos" disabled />
+                                                    }
+                                                    else
+                                                    {
+                                                        <input type="text" class="form-control" name="FacturaAlterna" id="FacturaAlterna" placeholder="Numero Factura Pos" />
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <input type="text" class="form-control" name="FacturaAlterna" id="FacturaAlterna" placeholder="Numero Factura Pos" disabled />
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="card-header">
+
+                                    @*Titulo Movimientos*@
+                                    <div class="row">
+
+                                        <div class="col-md-2">
+                                            <h4 class="card-title" style="color:red; font-weight:500">Movimientos</h4>
+                                        </div>
+
+                                        @if (Model.Tables[0].Rows[0]["EAN"].ToString() != "")
+                                        {
+                                            var Facturas = true;
+
+                                            foreach (DataRow row in Model.Tables[0].Rows)
+                                            {
+                                                var Entrada = row["Entrada"].ToString();
+
+                                                if (Entrada == "")
+                                                {
+                                                    Facturas = false;
+                                                    break;
+                                                }
+                                            }
+
+
+                                            if (Facturas)
+                                            {
+                                                if (EncabezadoAgrupado.Key.Estado.Equals("Entrada")
+                                                    || EncabezadoAgrupado.Key.Estado.Equals("Tercero")
+                                                    || EncabezadoAgrupado.Key.Estado.Equals("Guia Coordinadora")
+                                                    || EncabezadoAgrupado.Key.Estado.Equals("Handling")
+                                                    || EncabezadoAgrupado.Key.Estado.Equals("Invoiced")
+                                                    || EncabezadoAgrupado.Key.Estado.Equals("Tracking")
+                                                    || EncabezadoAgrupado.Key.Estado.Equals("Anulado")
+                                                    || EncabezadoAgrupado.Key.Estado.Equals("No Produccion"))
+                                                {
+                                                    <div class="col-md-1" style="left:1px">
+                                                        <input disabled value="Coordinadora" class="btn" type="button" style="@DatosImportantes.Tables[0].Rows[0]["EP_ColorBotonActualizar"].ToString(); @DatosImportantes.Tables[0].Rows[0]["EP_ColorTextoBotones"].ToString()" />
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="col-md-1" style="left:1px">
+                                                        <input value="Coordinadora" class="btn" type="button" style="@DatosImportantes.Tables[0].Rows[0]["EP_ColorBotonActualizar"].ToString(); @DatosImportantes.Tables[0].Rows[0]["EP_ColorTextoBotones"].ToString()" onclick="Coordinadora('@EncabezadoAgrupado.Key.OrderId')" />
+                                                    </div>
+                                                }
+
+                                                if (EncabezadoAgrupado.Key.Estado.Equals("Facturado")
+                                                    || EncabezadoAgrupado.Key.Estado.Equals("Guia Coordinadora")
+                                                    || EncabezadoAgrupado.Key.Estado.Equals("Handling")
+                                                    || EncabezadoAgrupado.Key.Estado.Equals("Invoiced")
+                                                    || EncabezadoAgrupado.Key.Estado.Equals("Tracking")
+                                                    || EncabezadoAgrupado.Key.Estado.Equals("Anulado")
+                                                    || EncabezadoAgrupado.Key.Estado.Equals("No Produccion"))
+                                                {
+                                                    <div class="col-md-1" style="left:50px">
+                                                        <input disabled value="Facturar" class="btn" type="button" style="@DatosImportantes.Tables[0].Rows[0]["EP_ColorBotonActualizar"].ToString(); @DatosImportantes.Tables[0].Rows[0]["EP_ColorTextoBotones"].ToString()" />
+                                                    </div>
+
+                                                    <div class="col-md-1" style="left:65px">
+                                                        <input disabled value="Facturar Con Codigo" class="btn" type="button" style="@DatosImportantes.Tables[0].Rows[0]["EP_ColorBotonActualizar"].ToString(); @DatosImportantes.Tables[0].Rows[0]["EP_ColorTextoBotones"].ToString()" />
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="col-md-1" style="left:50px">
+                                                        <input value="Facturar" class="btn" type="button" style="@DatosImportantes.Tables[0].Rows[0]["EP_ColorBotonActualizar"].ToString(); @DatosImportantes.Tables[0].Rows[0]["EP_ColorTextoBotones"].ToString()" onclick="Facturar('@EncabezadoAgrupado.Key.OrderId')" />
+                                                    </div>
+
+                                                    <div class="col-md-1" style="left:65px">
+                                                        <input value="Facturar Con Codigo" class="btn" type="button" style="@DatosImportantes.Tables[0].Rows[0]["EP_ColorBotonActualizar"].ToString(); @DatosImportantes.Tables[0].Rows[0]["EP_ColorTextoBotones"].ToString()" onclick="FacturarConCodigo('@EncabezadoAgrupado.Key.OrderId')" />
+                                                    </div>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <div class="col-md-1" style="left:1px">
+                                                    <input disabled value="Coordinadora" class="btn" type="button" style="@DatosImportantes.Tables[0].Rows[0]["EP_ColorBotonActualizar"].ToString(); @DatosImportantes.Tables[0].Rows[0]["EP_ColorTextoBotones"].ToString()" />
+                                                </div>
+
+                                                <div class="col-md-1" style="left:50px">
+                                                    <input disabled value="Facturar" class="btn" type="button" style="@DatosImportantes.Tables[0].Rows[0]["EP_ColorBotonActualizar"].ToString(); @DatosImportantes.Tables[0].Rows[0]["EP_ColorTextoBotones"].ToString()" />
+                                                </div>
+
+                                                <div class="col-md-1" style="left:65px">
+                                                    <input disabled value="Facturar Con Codigo" class="btn" type="button" style="@DatosImportantes.Tables[0].Rows[0]["EP_ColorBotonActualizar"].ToString(); @DatosImportantes.Tables[0].Rows[0]["EP_ColorTextoBotones"].ToString()" />
+                                                </div>
+                                            }
+                                        }
+
+                                        @if (EncabezadoAgrupado.Key.Estado.Equals("Facturado")
+                                             || EncabezadoAgrupado.Key.Estado.Equals("Guia Coordinadora")
+                                             || EncabezadoAgrupado.Key.Estado.Equals("Handling")
+                                             || EncabezadoAgrupado.Key.Estado.Equals("Invoiced")
+                                             || EncabezadoAgrupado.Key.Estado.Equals("Tracking")
+                                             || EncabezadoAgrupado.Key.Estado.Equals("Anulado")
+                                             || EncabezadoAgrupado.Key.Estado.Equals("No Produccion"))
+                                        {
+                                            <div class="col-md-1" style="left:155px">
+                                                <input value="Anular" disabled class="btn" style="@DatosImportantes.Tables[0].Rows[0]["EP_ColorBotonConsultar"].ToString(); @DatosImportantes.Tables[0].Rows[0]["EP_ColorTextoBotones"].ToString()" type="button" onclick="Anular('@EncabezadoAgrupado.Key.OrderId')" />
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="col-md-1" style="left:155px">
+                                                <input value="Anular" class="btn" style="@DatosImportantes.Tables[0].Rows[0]["EP_ColorBotonConsultar"].ToString(); @DatosImportantes.Tables[0].Rows[0]["EP_ColorTextoBotones"].ToString()" type="button" onclick="Anular('@EncabezadoAgrupado.Key.OrderId')" />
+                                            </div>
+                                        }
+
+                                        @if (Model.Tables[0].Rows[0]["EAN"].ToString() != "")
+                                        {
+                                            var TodasLasEntradas = false;
+
+                                            foreach (DataRow row in Model.Tables[0].Rows)
+                                            {
+                                                var Transferencia = row["Transferencia"].ToString();
+                                                var Entrada = row["Entrada"].ToString();
+
+                                                if (Transferencia != "" && Entrada == "")
+                                                {
+                                                    TodasLasEntradas = true;
+                                                }
+
+                                            }
+
+                                            if (TodasLasEntradas)
+                                            {
+                                                if (EncabezadoAgrupado.Key.Estado.Equals("Facturado")
+                                                    || EncabezadoAgrupado.Key.Estado.Equals("Guia Coordinadora")
+                                                    || EncabezadoAgrupado.Key.Estado.Equals("Handling")
+                                                    || EncabezadoAgrupado.Key.Estado.Equals("Invoiced")
+                                                    || EncabezadoAgrupado.Key.Estado.Equals("Tracking")
+                                                    || EncabezadoAgrupado.Key.Estado.Equals("Anulado")
+                                                    || EncabezadoAgrupado.Key.Estado.Equals("No Produccion"))
+                                                {
+                                                    <div class="col-md-2" style="left:160px">
+                                                        <input disabled value="Todas Las Entradas" class="btn" type="button" style="@DatosImportantes.Tables[0].Rows[0]["EP_ColorBotonActualizar"].ToString(); @DatosImportantes.Tables[0].Rows[0]["EP_ColorTextoBotones"].ToString()" />
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="col-md-2" style="left:160px">
+                                                        <input value="Todas Las Entradas" class="btn" type="button" style="@DatosImportantes.Tables[0].Rows[0]["EP_ColorBotonActualizar"].ToString(); @DatosImportantes.Tables[0].Rows[0]["EP_ColorTextoBotones"].ToString()" onclick="TodasEntradas('@EncabezadoAgrupado.Key.OrderId')" />
+                                                    </div>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <div class="col-md-2" style="left:160px">
+                                                    <input disabled value="Todas Las Entradas" class="btn" type="button" style="@DatosImportantes.Tables[0].Rows[0]["EP_ColorBotonActualizar"].ToString(); @DatosImportantes.Tables[0].Rows[0]["EP_ColorTextoBotones"].ToString()" />
+                                                </div>
+                                            }
+                                        }
+
+                                        @if (Model.Tables[0].Rows[0]["EAN"].ToString() != "")
+                                        {
+                                            var Facturas = true;
+
+                                            foreach (DataRow row in Model.Tables[0].Rows)
+                                            {
+                                                var Entrada = row["Entrada"].ToString();
+
+                                                if (Entrada == "")
+                                                {
+                                                    Facturas = false;
+                                                    break;
+                                                }
+                                            }
+
+
+                                            if (Facturas)
+                                            {
+                                                if (EncabezadoAgrupado.Key.Estado.Equals("Entrada")
+                                                || EncabezadoAgrupado.Key.Estado.Equals("Tercero")
+                                                || EncabezadoAgrupado.Key.Estado.Equals("Facturado")
+                                                || EncabezadoAgrupado.Key.Estado.Equals("Invoiced")
+                                                || EncabezadoAgrupado.Key.Estado.Equals("Anulado")
+                                                || EncabezadoAgrupado.Key.Estado.Equals("No Produccion"))
+                                                {
+                                                    <div class="col-md-1" style="left:140px">
+                                                        <input disabled value="Guia" class="btn" type="button" style="@DatosImportantes.Tables[0].Rows[0]["EP_ColorBotonActualizar"].ToString(); @DatosImportantes.Tables[0].Rows[0]["EP_ColorTextoBotones"].ToString()" />
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="col-md-1" style="left:140px">
+                                                        <input value="Guia" id="Guia" class="btn" type="button" style="@DatosImportantes.Tables[0].Rows[0]["EP_ColorBotonActualizar"].ToString(); @DatosImportantes.Tables[0].Rows[0]["EP_ColorTextoBotones"].ToString()" />
+                                                    </div>
+                                                }
+
+                                                if (EncabezadoAgrupado.Key.Estado.Equals("Entrada")
+                                                || EncabezadoAgrupado.Key.Estado.Equals("Tercero")
+                                                || EncabezadoAgrupado.Key.Estado.Equals("Facturado")
+                                                || EncabezadoAgrupado.Key.Estado.Equals("Invoiced")
+                                                || EncabezadoAgrupado.Key.Estado.Equals("Anulado")
+                                                || EncabezadoAgrupado.Key.Estado.Equals("No Produccion"))
+                                                {
+                                                    <div class="col-md-1" style="left:130px">
+                                                        <input disabled value="Rotulo" class="btn" type="button" style="@DatosImportantes.Tables[0].Rows[0]["EP_ColorBotonActualizar"].ToString(); @DatosImportantes.Tables[0].Rows[0]["EP_ColorTextoBotones"].ToString()" />
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="col-md-1" style="left:130px">
+                                                        <input value="Rotulo" id="Rotulo" class="btn" type="button" style="@DatosImportantes.Tables[0].Rows[0]["EP_ColorBotonActualizar"].ToString(); @DatosImportantes.Tables[0].Rows[0]["EP_ColorTextoBotones"].ToString()" />
+                                                    </div>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <div class="col-md-1" style="left:140px">
+                                                    <input disabled value="Guia" class="btn" type="button" style="@DatosImportantes.Tables[0].Rows[0]["EP_ColorBotonActualizar"].ToString(); @DatosImportantes.Tables[0].Rows[0]["EP_ColorTextoBotones"].ToString()" />
+                                                </div>
+
+                                                <div class="col-md-1" style="left:130px">
+                                                    <input disabled value="Rotulo" class="btn" type="button" style="@DatosImportantes.Tables[0].Rows[0]["EP_ColorBotonActualizar"].ToString(); @DatosImportantes.Tables[0].Rows[0]["EP_ColorTextoBotones"].ToString()" />
+                                                </div>
+                                            }
+                                        }
+
+                                    </div>
+
+                                    @*Datos Movimientos*@
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table id="basic-datatables" class="display table table-striped table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Ean</th>
+                                                        <th>Cantidad</th>
+                                                        <th>Bodega</th>
+                                                        <th>Requisicion</th>
+                                                        <th>Transferencia</th>
+                                                        <th>Entrada</th>
+                                                        <th>Acciones</th>
+                                                        <th>Resincronizar</th>
+                                                    </tr>
+                                                </thead>
+
+                                                <tbody>
+                                                    @if (Model.Tables[0].Rows[0]["EAN"].ToString() != "")
+                                                    {
+                                                        foreach (DataRow row in Model.Tables[0].Rows)
+                                                        {
+
+                                                            <tr>
+                                                                <td>@row["EAN"]</td>
+                                                                <td>@row["Cantidad"]</td>
+                                                                <td>@row["Bodega"]</td>
+                                                                <td>@row["Requisicion"]</td>
+                                                                <td>@row["Transferencia"]</td>
+                                                                <td>@row["Entrada"]</td>
+
+                                                                @{ var Transferencia = row["Transferencia"].ToString();
+                                                                    var Entrada = row["Entrada"].ToString();
+
+                                                                    if (Transferencia == "" || Entrada != "")
+                                                                    {
+                                                                        <td><input disabled value="Entrada" class="btn" type="button" style="@DatosImportantes.Tables[0].Rows[0]["EP_ColorBotonActualizar"].ToString(); @DatosImportantes.Tables[0].Rows[0]["EP_ColorTextoBotones"].ToString()" /></td>
+                                                                        <td><input disabled value="Re-Sincronizar" class="btn" type="button" style="@DatosImportantes.Tables[0].Rows[0]["EP_ColorBotonConsultar"].ToString(); @DatosImportantes.Tables[0].Rows[0]["EP_ColorTextoBotones"].ToString()" /></td>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        if (EncabezadoAgrupado.Key.Estado.Equals("Facturado")
+                                                                            || EncabezadoAgrupado.Key.Estado.Equals("Guia Coordinadora")
+                                                                            || EncabezadoAgrupado.Key.Estado.Equals("Handling")
+                                                                            || EncabezadoAgrupado.Key.Estado.Equals("Invoiced")
+                                                                            || EncabezadoAgrupado.Key.Estado.Equals("Tracking")
+                                                                            || EncabezadoAgrupado.Key.Estado.Equals("Anulado")
+                                                                            || EncabezadoAgrupado.Key.Estado.Equals("No Produccion"))
+                                                                        {
+                                                                            <td><input disabled value="Entrada" class="btn" type="button" style="@DatosImportantes.Tables[0].Rows[0]["EP_ColorBotonActualizar"].ToString(); @DatosImportantes.Tables[0].Rows[0]["EP_ColorTextoBotones"].ToString()" /></td>
+                                                                            <td><input disabled value="Re-Sincronizar" class="btn" type="button" style="@DatosImportantes.Tables[0].Rows[0]["EP_ColorBotonConsultar"].ToString(); @DatosImportantes.Tables[0].Rows[0]["EP_ColorTextoBotones"].ToString()" /></td>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <td><input value="Entrada" class="btn" type="button" style="@DatosImportantes.Tables[0].Rows[0]["EP_ColorBotonActualizar"].ToString(); @DatosImportantes.Tables[0].Rows[0]["EP_ColorTextoBotones"].ToString()" onclick="Entrada('@row["Transferencia"].ToString()')" /></td>
+                                                                            <td><input value="Re-Sincronizar" class="btn" type="button" style="@DatosImportantes.Tables[0].Rows[0]["EP_ColorBotonConsultar"].ToString(); @DatosImportantes.Tables[0].Rows[0]["EP_ColorTextoBotones"].ToString()" onclick="ResincronizarSalida('@row["Transferencia"].ToString()')" /></td>
+                                                                        }
+
+                                                                    }
+                                                                }
+                                                            </tr>
+                                                        }
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div class="container-fluid">
+                <div class="copyright ml-auto">
+                    2020, Hecho Por <a href="http://generictransfer.com/">Interfaces Y Soluciones</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="~/Content/assets/js/core/jquery.3.2.1.min.js"></script>
+    <script src="~/Content/assets/js/core/popper.min.js"></script>
+    <script src="~/Content/assets/js/core/bootstrap.min.js"></script>
+    <script src="~/Content/assets/js/plugin/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
+    <script src="~/Content/assets/js/plugin/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js"></script>
+    <script src="~/Content/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+    <script src="~/Content/assets/js/plugin/datatables/datatables.min.js"></script>
+    <script src="~/Content/assets/js/atlantis.min.js"></script>
+
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+    <script>
+
+        $(document).ready(function () {
+            $('#basic-datatables').DataTable({
+            });
+
+            $('#multi-filter-select').DataTable({
+                "pageLength": 5,
+                initComplete: function () {
+                    this.api().columns().every(function () {
+                        var column = this;
+                        var select = $('<select class="form-control"><option value=""></option></select>')
+                            .appendTo($(column.footer()).empty())
+                            .on('change', function () {
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+
+                                column
+                                    .search(val ? '^' + val + '$' : '', true, false)
+                                    .draw();
+                            });
+
+                        column.data().unique().sort().each(function (d, j) {
+                            select.append('<option value="' + d + '">' + d + '</option>')
+                        });
+                    });
+                }
+            });
+
+            // Add Row
+            $('#add-row').DataTable({
+                "pageLength": 5,
+            });
+
+            var action = '<td> <div class="form-button-action"> <button type="button" data-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Edit Task"> <i class="fa fa-edit"></i> </button> <button type="button" data-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Remove"> <i class="fa fa-times"></i> </button> </div> </td>';
+
+            $('#addRowButton').click(function () {
+                $('#add-row').dataTable().fnAddData([
+                    $("#addName").val(),
+                    $("#addPosition").val(),
+                    $("#addOffice").val(),
+                    action
+                ]);
+                $('#addRowModal').modal('hide');
+
+            });
+        });
+
+        $('#Guia').click(function (e) {
+            var url = '@Url.Action("Guia", "PedidosDetalle",new { OrderId= @EncabezadoAgrupado.Key.OrderId })';
+            window.location = url;
+            Proceso();
+        });
+
+        $('#Rotulo').click(function (e) {
+           var url = '@Url.Action("Rotulo", "PedidosDetalle",new { OrderId= @EncabezadoAgrupado.Key.OrderId })';
+           window.location = url;
+            Proceso();
+        });
+
+        function Entrada(Transferencia) {
+            swal({
+                title: "Estás seguro?",
+                text: "de realizar la siguiente entrada " + Transferencia,
+                icon: "warning",
+                buttons: true,
+                dangerMode: true,
+            })
+                .then((Entrada) => {
+                    if (Entrada) {
+
+                        Proceso();
+
+                        $.ajax({
+                            type: "POST",
+                            data: {
+                                Transferencia: Transferencia
+                            },
+                            url: "/PedidosDetalle/Entrada",
+                            dataType: "json",
+                            success: function (response) {
+                                var respuesta = response.split("|");
+                                swal(response, {
+                                    text: respuesta[1],
+                                    icon: respuesta[0],
+                                }).then(function () {
+                                    window.location.reload(true);
+                                });
+
+                            },
+                            failure: function (response) {
+                                alert(response.responseText);
+                            },
+                            error: function (response) {
+                                alert(response.responseText);
+                            }
+                        });
+
+                    }
+                    else {
+                        swal("No has realizado la entrada!");
+                    }
+                });
+        }
+
+        function ResincronizarSalida(Transferencia) {
+            swal({
+                title: "Estás seguro?",
+                text: "de resincronizar la siguiente transferencia " + Transferencia + " recuerde realizar la anulación de la RQE y TIN de forma manual.",
+                icon: "warning",
+                buttons: true,
+                dangerMode: true,
+            })
+                .then((ResincronizarSalida) => {
+                    if (ResincronizarSalida) {
+
+                        Proceso();
+
+                        $.ajax({
+                            type: "POST",
+                            data: {
+                                Transferencia: Transferencia
+                            },
+                            url: "/PedidosDetalle/ResincronizarSalida",
+                            dataType: "json",
+                            success: function (response) {
+                                var respuesta = response.split("|");
+                                swal(response, {
+                                    text: respuesta[1],
+                                    icon: respuesta[0],
+                                }).then(function () {
+                                    window.location.reload(true);
+                                });
+
+                            },
+                            failure: function (response) {
+                                alert(response.responseText);
+                            },
+                            error: function (response) {
+                                alert(response.responseText);
+                            }
+                        });
+
+                    }
+                    else {
+                        swal("No has realizado la resincronización!");
+                    }
+                });
+        }
+
+        function TodasEntradas(OrderId) {
+            swal({
+                title: "Estás seguro?",
+                text: "de realizar todas las entradas, # orden: " + OrderId,
+                icon: "warning",
+                buttons: true,
+                dangerMode: true,
+            })
+                .then((TodasEntradas) => {
+                    if (TodasEntradas) {
+
+                        Proceso();
+
+                        $.ajax({
+                            type: "POST",
+                            data: {
+                                OrderId: OrderId
+                            },
+                            url: "/PedidosDetalle/TodasEntradas",
+                            dataType: "json",
+                            success: function (response) {
+                                var respuesta = response.split("|");
+                                swal(response, {
+                                    text: respuesta[1],
+                                    icon: respuesta[0],
+                                }).then(function () {
+                                    window.location.reload(true);
+                                });
+
+                            },
+                            failure: function (response) {
+                                alert(response.responseText);
+                            },
+                            error: function (response) {
+                                alert(response.responseText);
+                            }
+                        });
+
+                    }
+                    else {
+                        swal("No has realizado las entradas!");
+                    }
+                });
+        }
+
+        function Facturar(OrderId) {
+
+            var RowIdEmpaques = document.getElementById('RowIdEmpaques').value;
+            var CodigoAlterno = document.getElementById('CodigoAlterno').value;
+
+            if (RowIdEmpaques == null || RowIdEmpaques == '') {
+
+                swal("Debes seleccionar un empaque!");
+                return false;
+            }
+            else {
+                swal({
+                    title: "Estás seguro?",
+                    text: "de facturar la siguiente orden: " + OrderId,
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                })
+                    .then((Facturar) => {
+                        if (Facturar) {
+
+                             swal({
+                             title: "Desea generar guia y rotulo?",
+                             text: "para la siguiente orden: " + OrderId,
+                            buttons: {
+                                cancel : "Cancel",
+                                no : "No",
+                                si : "Si",
+                              },
+                            })
+                            .then((value) => {
+                              switch (value) {
+                             
+                                case "no":
+
+                                    Proceso();
+
+                                    $.ajax({
+                                        type: "POST",
+                                        data: {
+                                            OrderId: OrderId,
+                                            RowIdEmpaques: RowIdEmpaques,
+                                            CodigoAlterno: CodigoAlterno
+                                        },
+                                        url: "/PedidosDetalle/FacturarSinGuia",
+                                        dataType: "json",
+                                        success: function (response) {
+                                            var respuesta = response.split("|");
+                                            swal(response, {
+                                                text: respuesta[1],
+                                                icon: respuesta[0],
+                                            }).then(function () {
+                                                window.location.reload(true);
+                                            });
+
+                                        },
+                                        failure: function (response) {
+                                            alert(response.responseText);
+                                        },
+                                        error: function (response) {
+                                            alert(response.responseText);
+                                        }
+                                    });
+
+                                  break;
+                             
+                                case "si":
+
+                                    Proceso();
+
+                                    $.ajax({
+                                        type: "POST",
+                                        data: {
+                                            OrderId: OrderId,
+                                            RowIdEmpaques: RowIdEmpaques,
+                                            CodigoAlterno: CodigoAlterno
+                                        },
+                                        url: "/PedidosDetalle/FacturarConGuia",
+                                        dataType: "json",
+                                        success: function (response) {
+                                            var respuesta = response.split("|");
+                                            swal(response, {
+                                                text: respuesta[1],
+                                                icon: respuesta[0],
+                                            }).then(function () {
+                                                window.location.reload(true);
+                                            });
+
+                                        },
+                                        failure: function (response) {
+                                            alert(response.responseText);
+                                        },
+                                        error: function (response) {
+                                            alert(response.responseText);
+                                        }
+                                    });
+
+                                  break;
+                             
+                                default:
+                                 swal("No has facturado!");
+                              }
+                            });
+                        }
+                        else {
+                            swal("No has facturado!");
+                        }
+                    });
+            }
+        }
+
+        function FacturarConCodigo(OrderId) {
+
+            var RowIdEmpaques = document.getElementById('RowIdEmpaques').value;
+            var CodigoAlterno = document.getElementById('CodigoAlterno').value;
+            var FacturaAlterna = document.getElementById('FacturaAlterna').value;
+
+            if (RowIdEmpaques == null || RowIdEmpaques == '') {
+
+                swal("Debes seleccionar un empaque!");
+                return false;
+            }
+
+            else if (FacturaAlterna == null || FacturaAlterna == '') {
+
+                swal("Debes ingresar el numero de la factura pos!");
+                return false;
+            }
+            else {
+                swal({
+                    title: "Estás seguro?",
+                    text: "de facturar la siguiente orden: " + OrderId,
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                })
+                    .then((Coordinadora) => {
+                        if (Coordinadora) {
+
+                            Proceso();
+
+                            $.ajax({
+                                type: "POST",
+                                data: {
+                                    OrderId: OrderId,
+                                    RowIdEmpaques: RowIdEmpaques,
+                                    CodigoAlterno: CodigoAlterno,
+                                    FacturaAlterna: FacturaAlterna
+                                },
+                                url: "/PedidosDetalle/FacturarConCodigo",
+                                dataType: "json",
+                                success: function (response) {
+                                    var respuesta = response.split("|");
+                                    swal(response, {
+                                        text: respuesta[1],
+                                        icon: respuesta[0],
+                                    }).then(function () {
+                                        window.location.reload(true);
+                                    });
+
+                                },
+                                failure: function (response) {
+                                    alert(response.responseText);
+                                },
+                                error: function (response) {
+                                    alert(response.responseText);
+                                }
+                            });
+
+                        }
+                        else {
+                            swal("No has facturado!");
+                        }
+                    });
+            }
+        }
+
+        function Coordinadora(OrderId) {
+
+            var CodigoAlterno = document.getElementById('CodigoAlterno').value;
+
+            if (CodigoAlterno == null || CodigoAlterno == '') {
+
+                swal("Debes ingresar el codigo alterno!");
+                return false;
+            }
+            else {
+                swal({
+                    title: "Estás seguro?",
+                    text: "de generar guia de la siguiente orden: " + OrderId,
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                })
+                    .then((Coordinadora) => {
+                        if (Coordinadora) {
+
+                            Proceso();
+
+                            $.ajax({
+                                type: "POST",
+                                data: {
+                                    OrderId: OrderId,
+                                    CodigoAlterno: CodigoAlterno
+                                },
+                                url: "/PedidosDetalle/Coordinadora",
+                                dataType: "json",
+                                success: function (response) {
+                                    var respuesta = response.split("|");
+                                    swal(response, {
+                                        text: respuesta[1],
+                                        icon: respuesta[0],
+                                    }).then(function () {
+                                        window.location.reload(true);
+                                    });
+
+                                },
+                                failure: function (response) {
+                                    alert(response.responseText);
+                                },
+                                error: function (response) {
+                                    alert(response.responseText);
+                                }
+                            });
+
+                        }
+                        else {
+                            swal("No has generado guia!");
+                        }
+                    });
+            }
+        }
+
+        function Anular(OrderId) {
+            swal({
+                title: "Estás seguro?",
+                text: "de anular la siguiente orden: " + OrderId,
+                icon: "warning",
+                buttons: true,
+                dangerMode: true,
+            })
+                .then((Anular) => {
+                    if (Anular) {
+
+                        Proceso();
+
+                        $.ajax({
+                            type: "POST",
+                            data: {
+                                OrderId: OrderId
+                            },
+                            url: "/PedidosDetalle/Anular",
+                            dataType: "json",
+                            success: function (response) {
+                                var respuesta = response.split("|");
+                                swal(response, {
+                                    text: respuesta[1],
+                                    icon: respuesta[0],
+                                }).then(function () {
+                                    window.location.reload(true);
+                                });
+
+                            },
+                            failure: function (response) {
+                                alert(response.responseText);
+                            },
+                            error: function (response) {
+                                alert(response.responseText);
+                            }
+                        });
+
+                    }
+                    else {
+                        swal("No has realizado la anulación!");
+                    }
+                });
+        }
+
+    </script>
+
+}
+
+else
+{
+    <div class="main-panel">
+        <div class="content">
+            <div class="card">
+                <div class="card-body" style="@Fondo">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header">
+
+                                    @*Titulo Encabezado*@
+                                    <div class="row">
+
+                                        <div class="col-md-12">
+                                            <h4 class="card-title" style="color:red; font-weight:500">No hay datos disponibles</h4>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div class="container-fluid">
+                <div class="copyright ml-auto">
+                    2020, Hecho Por <a href="http://generictransfer.com/">Interfaces Y Soluciones</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="~/Content/assets/js/core/jquery.3.2.1.min.js"></script>
+    <script src="~/Content/assets/js/core/popper.min.js"></script>
+    <script src="~/Content/assets/js/core/bootstrap.min.js"></script>
+    <script src="~/Content/assets/js/plugin/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
+    <script src="~/Content/assets/js/plugin/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js"></script>
+    <script src="~/Content/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+    <script src="~/Content/assets/js/plugin/datatables/datatables.min.js"></script>
+    <script src="~/Content/assets/js/atlantis.min.js"></script>
+
+    <script>
+
+        $(document).ready(function () {
+            $('#basic-datatables').DataTable({
+            });
+
+            $('#multi-filter-select').DataTable({
+                "pageLength": 5,
+                initComplete: function () {
+                    this.api().columns().every(function () {
+                        var column = this;
+                        var select = $('<select class="form-control"><option value=""></option></select>')
+                            .appendTo($(column.footer()).empty())
+                            .on('change', function () {
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+
+                                column
+                                    .search(val ? '^' + val + '$' : '', true, false)
+                                    .draw();
+                            });
+
+                        column.data().unique().sort().each(function (d, j) {
+                            select.append('<option value="' + d + '">' + d + '</option>')
+                        });
+                    });
+                }
+            });
+
+            // Add Row
+            $('#add-row').DataTable({
+                "pageLength": 5,
+            });
+
+            var action = '<td> <div class="form-button-action"> <button type="button" data-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Edit Task"> <i class="fa fa-edit"></i> </button> <button type="button" data-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Remove"> <i class="fa fa-times"></i> </button> </div> </td>';
+
+            $('#addRowButton').click(function () {
+                $('#add-row').dataTable().fnAddData([
+                    $("#addName").val(),
+                    $("#addPosition").val(),
+                    $("#addOffice").val(),
+                    action
+                ]);
+                $('#addRowModal').modal('hide');
+
+            });
+        });
+
+    </script>
+}
+

@@ -1,0 +1,18 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="Infraestructura.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="Infraestructura_WsGenerarGuiasPruebas_JRpcServerSoapManagerService" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://sandbox.coordinadora.com/agw/ws/guias/1.6/server.php</Value>
+    </Setting>
+    <Setting Name="Infraestructura_WsGenerarGuiasReal_JRpcServerSoapManagerService" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://guias.coordinadora.com/ws/guias/1.6/server.php</Value>
+    </Setting>
+    <Setting Name="Infraestructura_Ws_GT_Pruebas_wsGenerarPlano" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://192.168.120.81:7780/GTIntegrationMultiCia_Pruebas/ServiciosWeb/wsGenerarPlano.asmx</Value>
+    </Setting>
+    <Setting Name="Infraestructura_Ws_GT_Real_wsGenerarPlano" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://192.168.120.81:7780/GTIntegrationMultiCia/ServiciosWeb/wsGenerarPlano.asmx</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

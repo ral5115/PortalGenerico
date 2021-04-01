@@ -1,0 +1,39 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = null;
+}
+
+<h2>MODULO TEST</h2>
+
+<div>
+    <a href="/Test/Download">Descargar</a>
+</div>
+
+<br />
+
+<div>
+    <input type="submit" id="Descargar" value="Descargar" />
+</div>
+
+
+<script src="~/Content/assets/js/core/jquery.3.2.1.min.js"></script>
+<script src="~/Content/assets/js/core/popper.min.js"></script>
+<script src="~/Content/assets/js/core/bootstrap.min.js"></script>
+<script src="~/Content/assets/js/plugin/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
+<script src="~/Content/assets/js/plugin/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js"></script>
+<script src="~/Content/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+<script src="~/Content/assets/js/plugin/datatables/datatables.min.js"></script>
+<script src="~/Content/assets/js/atlantis.min.js"></script>
+
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+<script type="text/javascript">
+
+    $('#Descargar').click(function (e) {
+
+        var url = '@Url.Action("DownloadParameter", "Test",new { OrderId= "1233" })';
+        window.location = url;
+     });
+
+</script>
